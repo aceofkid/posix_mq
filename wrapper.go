@@ -78,8 +78,9 @@ func mq_open(name string, oflag int, mode int, attr *MessageQueueAttribute) (int
 }
 
 func mq_send(h int, data []byte, priority uint) (int, error) {
-	byteStr := *(*string)(unsafe.Pointer(&data))
-	rv, err := C.mq_send(C.int(h), C.CString(byteStr), C.size_t(len(data)), C.uint(priority))
+	var cmsg *C.char = C.CString(string(data[:]))
+	defer C.free(unsafe.Pointer(cmsg))
+	rv, err := C.mq_send(C.int(h), cmsg, C.size_t(len(data)), C.uint(priority))
 	return int(rv), err
 }
 
